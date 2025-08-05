@@ -1,5 +1,5 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { use } from "react";
+import { Link, Navigate } from "react-router-dom";
 import styled from "styled-components";
 import logo from "../assets/logo.svg";
 import { useState } from "react";
@@ -9,6 +9,7 @@ import axios from 'axios';
 import { registerRoute } from "../utils/APIRoutes";
 
 const Register = () => {
+  const navigate = useNavigate();
   const [values, setvalues] = useState({
     username: "",
     email: "",
@@ -25,26 +26,20 @@ const Register = () => {
   const handleSubmit = async (event) => {
   event.preventDefault();
   if (handleValidation()) {
-    const { password, confirmPassword, username, email } = values;
-    try {
-      const { data } = await axios.post(registerRoute, {
-        username,
-        email,
-        password,
-        confirmPassword,
-      });
-
-      // ✅ Show toast on success
-      if (data.success) {
-        toast.success(data.msg, toastOptions);
-        // optionally redirect after delay
-      } else {
-        toast.error("Something went wrong!", toastOptions);
-      }
-    } catch (err) {
-      console.error("Axios error:", err);
-      toast.error("Network or Server Error", toastOptions);
+    console.log("In Validation",registerRoute);
+    const{password, username, email} = values;
+    const { data } = await axios.post(registerRoute, {
+      username,
+      email,
+      password,
+    });
+    if (data.status === false) {
+      toast.error(data.msg, toastOptions);
     }
+    if (data.status === true) {
+      localStorage.setItem("snappy-user", JSON.stringify(data.user));
+    }
+    navigate("/")
   }
 };
 
